@@ -15,8 +15,6 @@ def connect_to_mysql():
     if connection.is_connected():
         print("Connected to MySQL database")
 
-        # Perform further operations here
-
         # Close the connection
         connection.close()
         print("Connection closed")
@@ -56,6 +54,67 @@ def createaccount(name, lastname, address, pin):
     except mysql.connector.Error as error:
         print("Error inserting data into MySQL table:", error)
 
+def editaccount(accountnum, col, val):
+    try:
+        # Establish the connection
+        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+
+        # Create a new cursor
+        cursor = connection.cursor()
+
+        # The SQL query to update a column
+
+        query = f"UPDATE `C2C database`.`users` SET `{col}` = '{val}' WHERE (`accountnum` = '{accountnum}');"
+
+        # Execute the query
+
+        cursor.execute(query)
+
+        # Commit the changes to the database
+        connection.commit()
+
+        print("Data updated successfully")
+
+    except mysql.connector.Error as error:
+        print("Error updating data in MySQL table:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def deleteaccount(accountnum):
+    try:
+        # Establish the connection
+        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+
+        # Create a new cursor
+        cursor = connection.cursor()
+
+        # The SQL query to delete a row
+        query = f"DELETE FROM users WHERE accountnum = {accountnum}"
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Commit the changes to the database
+        connection.commit()
+
+        print("Account deleted successfully")
+
+    except mysql.connector.Error as error:
+        print("Error deleting account in MySQL table:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 if __name__ == "__main__":
-    connect_to_mysql()
-    createaccount("Luis","terrazas","123 main","2090")
+    #connect_to_mysql()
+    #createaccount("Luis","terrazas","123 main","2090")
+    editaccount("6", "name", "antonio")
+    editaccount("6", "lastname", "mendoza")
+    editaccount("6", "pin", "1000") 
+    editaccount("6", "address", "456 main")
+    deleteaccount("6")
