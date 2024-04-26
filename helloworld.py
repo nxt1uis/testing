@@ -26,5 +26,5 @@ for (id, name, type) in cursor:
 cursor.close()
 cnx.close()
 
-
+def createaccp
 
