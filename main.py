@@ -110,6 +110,75 @@ def deleteaccount(accountnum):
             cursor.close()
             connection.close()
 
+def create_transaction(accountnum, amount, transaction_type):
+
+    balance = get_transactions(accountnum)
+    if (float(balance) < abs(float(amount))) and (transaction_type == 'withdraw'):
+        return
+
+    try:
+        # Establish the connection
+        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+
+        # Create a new cursor
+        cursor = connection.cursor()
+
+        # The SQL query to insert a new row
+        query = "INSERT INTO transactiontable (accountnum, amount, transactiontype) VALUES (%s, %s, %s)"
+
+        # Execute the query
+        cursor.execute(query, (accountnum, amount, transaction_type))
+
+        # Get the ID of the last inserted row
+        last_id = cursor.lastrowid
+
+        # Commit the changes to the database
+        connection.commit()
+
+        print("Transaction created successfully. ID is:", last_id)
+
+    except mysql.connector.Error as error:
+        print("Error creating transaction in MySQL table:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def get_transactions(accountnum):
+    try:
+        # Establish the connection
+        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+
+        # Create a new cursor
+        cursor = connection.cursor()
+
+        # The SQL query to get all transactions for a given account number
+        query = f"SELECT amount FROM transactiontable WHERE accountnum = '{accountnum}'"
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Fetch all the rows
+        rows = cursor.fetchall()
+
+        total = 0.0
+        for row in rows:
+            #print(row)
+            total=total+row[0]
+
+        #print(f'total amount is :{total}')
+        return total
+              
+
+    except mysql.connector.Error as error:
+        print("Error getting transactions from MySQL table:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 if __name__ == "__main__":
     #connect_to_mysql()
     #createaccount("Luis","terrazas","123 main","2090")
@@ -118,3 +187,7 @@ if __name__ == "__main__":
     editaccount("6", "pin", "1000") 
     editaccount("6", "address", "456 main")
     deleteaccount("6")
+    create_transaction("6", "10", "deposit" )
+    create_transaction("6", "-15.54", "withdraw")
+    create_transaction("6", "-10", "withdraw")
+    print(get_transactions("6"))
