@@ -2,14 +2,14 @@
 
 import mysql.connector
 
+def establish_connection():
+    connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+    return connection
+
+
 def connect_to_mysql():
     # Establish a connection to the MySQL server
-    connection = mysql.connector.connect(
-        host="127.0.0.1",
-        user="root",
-        password="luis",
-        database="C2C database"
-    )
+    connection = establish_connection()
 
     # Check if the connection was successful
     if connection.is_connected():
@@ -22,12 +22,7 @@ def connect_to_mysql():
 def createaccount(name, lastname, address, pin):
     try:
         # Establish a connection to the MySQL server
-        connection = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="luis",
-            database="C2C database"
-        )
+        connection = establish_connection()
         # Create a cursor object to execute SQL queries
         cursor = connection.cursor()
         
@@ -57,7 +52,7 @@ def createaccount(name, lastname, address, pin):
 def editaccount(accountnum, col, val):
     try:
         # Establish the connection
-        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+        connection = establish_connection()
 
         # Create a new cursor
         cursor = connection.cursor()
@@ -86,7 +81,7 @@ def editaccount(accountnum, col, val):
 def deleteaccount(accountnum):
     try:
         # Establish the connection
-        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+        connection = establish_connection()
 
         # Create a new cursor
         cursor = connection.cursor()
@@ -114,11 +109,11 @@ def create_transaction(accountnum, amount, transaction_type):
 
     balance = get_transactions(accountnum)
     if (float(balance) < abs(float(amount))) and (transaction_type == 'withdraw'):
-        return
+        return None
 
     try:
         # Establish the connection
-        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+        connection = establish_connection()
 
         # Create a new cursor
         cursor = connection.cursor()
@@ -135,7 +130,8 @@ def create_transaction(accountnum, amount, transaction_type):
         # Commit the changes to the database
         connection.commit()
 
-        print("Transaction created successfully. ID is:", last_id)
+        #print("Transaction created successfully. ID is:", last_id)
+        return get_transactions(accountnum)
 
     except mysql.connector.Error as error:
         print("Error creating transaction in MySQL table:", error)
@@ -148,7 +144,7 @@ def create_transaction(accountnum, amount, transaction_type):
 def get_transactions(accountnum):
     try:
         # Establish the connection
-        connection = mysql.connector.connect(host='127.0.0.1', database='C2C database', user='root', password='luis')
+        connection = establish_connection()
 
         # Create a new cursor
         cursor = connection.cursor()
@@ -179,15 +175,50 @@ def get_transactions(accountnum):
             cursor.close()
             connection.close()
 
-if __name__ == "__main__":
+
+def test_functions():
     #connect_to_mysql()
     #createaccount("Luis","terrazas","123 main","2090")
     editaccount("6", "name", "antonio")
     editaccount("6", "lastname", "mendoza")
     editaccount("6", "pin", "1000") 
     editaccount("6", "address", "456 main")
-    deleteaccount("6")
+    # deleteaccount("6")
+    create_transaction("6", "100", "deposit" )
     create_transaction("6", "10", "deposit" )
     create_transaction("6", "-15.54", "withdraw")
     create_transaction("6", "-10", "withdraw")
     print(get_transactions("6"))
+
+def get_pin(accountnum):
+    try:
+        # Establish the connection
+        connection = establish_connection()
+
+        # Create a new cursor
+        cursor = connection.cursor()
+
+        # The SQL query to get the pin for a given account number
+        query = "SELECT pin FROM users WHERE accountnum = %s"
+
+        # Execute the query
+        cursor.execute(query, (accountnum,))
+
+        # Fetch the first row
+        row = cursor.fetchone()
+
+        if row is not None:
+            return row[0]
+        else:
+            return None
+
+    except mysql.connector.Error as error:
+        print("Error getting pin from MySQL table:", error)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+if __name__ == "__main__":
+    test_functions()
