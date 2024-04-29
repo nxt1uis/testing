@@ -23,30 +23,35 @@ def login_menu():
     global accountnumber
     next_state = ""
     print("\nWelcome to the bank system. Please enter your account number and pin.\n")
-    accountnumber = int(input("Account number? "))
-    db_pin = get_pin(accountnumber)
+    try:
+        accountnumber = int(input("Account number? "))
+        db_pin = get_pin(accountnumber)
 
-    if(db_pin == None):
-        user_new_account = input("Account number does not exist. Would you like to make a new one? ")
-        if user_new_account == "yes":
-            return "create_new_user_account"
+        if(db_pin == None):
+            user_new_account = input("Account number does not exist. Would you like to make a new one? ")
+            if user_new_account == "yes":
+                return "create_new_user_account"
+            else:
+                return "login_menu"
+
+        pin = int(input("PIN? "))
+        usertype = get_user_type(accountnumber)
+
+        if (pin == db_pin) and (usertype == "admin"):
+            print('\nWelcome to the admin menu')
+            next_state = 'admin_menu'
+        elif (pin == db_pin) and (usertype == "customer"):
+            print("\nYou have logged in successfuilly")
+            next_state= 'standard_menu'
         else:
-            return "login_menu"
+            input("PIN nummber is incorrect.")
+            next_state= 'login_menu'
 
-    pin = int(input("PIN? "))
-    usertype = get_user_type(accountnumber)
-
-    if (pin == db_pin) and (usertype == "admin"):
-        print('\nWelcome to the admin menu')
-        next_state = 'admin_menu'
-    elif (pin == db_pin) and (usertype == "customer"):
-        print("\nYou have logged in successfuilly")
-        next_state= 'standard_menu'
-    else:
-        input("PIN nummber is incorrect.")
-        next_state= 'login_menu'
-
-    return next_state
+        return next_state
+    except:
+        input("Wrong account number format try again only numbers accepted1: <press enter>")
+        return "login_menu"
+    
 
 def standard_menu():
     #standard customer menu with all of the customer options
