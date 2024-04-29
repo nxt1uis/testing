@@ -43,8 +43,6 @@ def createaccount(name, lastname, address, pin):
         cursor.close()
         connection.close()
         
-        print("Data inserted successfully")
-        print(last_id)
         return last_id
     except mysql.connector.Error as error:
         print("Error inserting data into MySQL table:", error)
@@ -95,7 +93,16 @@ def deleteaccount(accountnum):
         # Commit the changes to the database
         connection.commit()
 
-        print("Account deleted successfully")
+        # The SQL query to delete a row
+        query = f"DELETE FROM transactiontable WHERE accountnum = {accountnum}"
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Commit the changes to the database
+        connection.commit()
+
+
 
     except mysql.connector.Error as error:
         print("Error deleting account in MySQL table:", error)
@@ -175,7 +182,6 @@ def get_transactions(accountnum):
             cursor.close()
             connection.close()
 
-
 def test_functions():
     #connect_to_mysql()
     #createaccount("Luis","terrazas","123 main","2090")
@@ -220,5 +226,30 @@ def get_pin(accountnum):
             cursor.close()
             connection.close()
 
+def get_user_type(accountnum):
+    try:
+        # Establish the connection
+        connection = establish_connection()
+        # Create a new cursor
+        cursor = connection.cursor()
+        # The SQL query to get the user type for a given account number
+        query = "SELECT user_type FROM users WHERE accountnum = %s"
+        # Execute the query
+        cursor.execute(query, (accountnum,))
+        # Fetch the first row
+        row = cursor.fetchone()
+        if row is not None:
+            return row[0]
+        else:
+            return None
+    except mysql.connector.Error as error:
+        print("Error getting user type from MySQL table:", error)
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
 if __name__ == "__main__":
     test_functions()
+
+get_user_type("6")
